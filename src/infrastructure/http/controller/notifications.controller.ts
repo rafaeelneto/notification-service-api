@@ -1,9 +1,7 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { Content } from 'src/application/entities/content';
-import { Notification } from 'src/application/entities/Notification';
+import { Body, Controller, Post } from '@nestjs/common';
 import { SendNotification } from 'src/application/use-cases/sendNotification';
-import { PrismaService } from 'src/infrastructure/database/prisma/prisma.service';
 import { CreateNotificationBody } from '../dtos/create-notification-body';
+import { ViewNotificationMapper } from '../mappers/viewNotificationMappers';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -19,6 +17,6 @@ export class NotificationsController {
       recipientId,
     });
 
-    return notification;
+    return ViewNotificationMapper.toHTTP(notification);
   }
 }
