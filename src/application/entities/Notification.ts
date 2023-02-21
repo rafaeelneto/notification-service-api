@@ -4,12 +4,13 @@ import { randomUUID } from 'node:crypto';
 
 export interface NotificationProps {
   recipientId: string;
-
+  id?: string;
   // Value object da variável conteúdo
   content: Content;
   category: string;
   readAt?: Date | null;
   createdAt: Date;
+  canceledAt?: Date | null;
 }
 
 export class Notification {
@@ -18,7 +19,7 @@ export class Notification {
 
   // createdAt can be optional at creating notification
   constructor(props: Replace<NotificationProps, { createdAt?: Date }>) {
-    this._id = randomUUID();
+    this._id = props.id || randomUUID();
     this.props = {
       ...props,
       createdAt: props.createdAt ?? new Date(),
@@ -53,8 +54,16 @@ export class Notification {
     return this.props.category;
   }
 
-  public set readAt(readAt: Date | null | undefined) {
-    this.props.readAt = readAt;
+  public read() {
+    this.props.readAt = new Date();
+  }
+
+  public cancel() {
+    this.props.canceledAt = new Date();
+  }
+
+  public get canceledAt(): Date | null | undefined {
+    return this.props.canceledAt;
   }
 
   public get readAt(): Date | null | undefined {

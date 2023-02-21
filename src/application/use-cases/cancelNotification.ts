@@ -1,30 +1,37 @@
-import { Injectable } from '@nestjs/common';
-import { Content } from '../entities/content';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Notification } from '../entities/Notification';
 import { NotificationRepository } from '../repositories/NotificationRepository';
+import { NotificationNotFound } from './errors/notification-not-found.error';
 
 export interface CancelNotificationPropsRequirements {
-  recipientId: string;
+  notificationId: string;
 }
 
-export interface CancelNotificationPropsResponse {
+export type CancelNotificationPropsResponse = {
   notification: Notification;
-}
+};
 
 @Injectable()
-export class SendNotification {
+export class CancelNotification {
   constructor(private notificationRepository: NotificationRepository) {}
   async execute(
     request: CancelNotificationPropsRequirements,
   ): Promise<CancelNotificationPropsResponse> {
-    const { recipientId } = request;
+    const { notificationId } = request;
 
-    const notification = new Notification({
-      recipientId,
-    });
+    // Find on DB
+    const notification = await this.notificationRepository.findByNotificationId(
+      notificationId,
+    );
 
-    // Persistir no DB
-    await this.notificationRepository.create(notification);
+    if (!notification) {
+      throw new NotificationNotFound();
+    }
+
+    notification.cancel();
+
+    // Persist on DB
+    await this.notificationRepository.save(notification);
 
     return {
       notification,
